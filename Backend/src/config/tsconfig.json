@@ -1,3 +1,4 @@
+// config/config.json
 {
   "development": {
     "username": "root",

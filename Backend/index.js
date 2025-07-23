@@ -1,36 +1,40 @@
-import express from "express";
+// src/index.js
 import dotenv from "dotenv";
+import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import path from "path";
-import authRoutes from "./src/Routes/auth.js";
-import messageRoutes from "./src/Routes/message.js";
-import { app, server } from "./src/lib/socket.js";
-import sequelize from "./src/lib/db.js";
+
+import sequelize from "./lib/db.js";          // <-- החיבור החדש
+import authRouter from "./routes/auth.router.js";
+import msgRouter  from "./routes/message.router.js";
+import { protectRoute } from "./middleware/auth.middleware.js";
 
 dotenv.config();
 
-const PORT = process.env.PORT;
-const __dirname = path.resolve();
+const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 
-app.use("/api/auth", authRoutes);
-app.use("/api/messages", messageRoutes);
+app.use("/api/auth", authRouter);
+app.use("/api/messages", protectRoute, msgRouter);
 
-if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "../frontend/dist")));
-    app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
-    });
+const PORT = process.env.PORT || 5000;
+async function start() {
+    try {
+        await sequelize.authenticate();
+        console.log("✅ Database connected!");
+        // במקום מיגריישנים אוטומטיים:
+        await sequelize.sync({ alter: true });
+        console.log("✅ Models synced!");
+
+        app.listen(PORT, () => {
+            console.log(`🚀 Server listening on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error("❌ Failed to start:", err);
+    }
 }
 
-sequelize.sync().then(() => {
-    server.listen(PORT, () => {
-        console.log("server is running on PORT:" + PORT);
-    });
-}).catch((err) => {
-    console.error("Unable to connect to the database:", err);
-});
+start();
