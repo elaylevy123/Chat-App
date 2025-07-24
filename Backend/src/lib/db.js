@@ -1,17 +1,18 @@
+// src/lib/db.js
+import dotenv from "dotenv";
 import { Sequelize } from "sequelize";
-const configFile = require("../config/config.js");
 
-const env = process.env.NODE_ENV || "development";
-const config = configFile[env];
+dotenv.config(); // טוען את הערכים מ־.env
 
 const sequelize = new Sequelize(
-    config.database,
-    config.username,
-    config.password,
+    process.env.DB_NAME,
+    process.env.DB_USER || 'root',
+    process.env.DB_PASSWORD || null,
     {
-        host: config.host,
-        dialect: config.dialect,
-        logging: false,
+        host:     process.env.DB_HOST || '127.0.0.1',
+        port:     process.env.DB_PORT   || 3306,
+        dialect:  process.env.DB_DIALECT || 'mysql',
+        logging: false,  // true אם רוצים לראות את ה־SQL בלוג
     }
 );
 

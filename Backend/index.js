@@ -4,10 +4,10 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-import sequelize from "./lib/db.js";          // <-- החיבור החדש
-import authRouter from "./routes/auth.router.js";
-import msgRouter  from "./routes/message.router.js";
-import { protectRoute } from "./middleware/auth.middleware.js";
+import sequelize from "./src/lib/db.js";          // <-- החיבור החדש
+import authRouter from "./src/Routes/auth.js";
+import msgRouter  from "./src/Routes/message.js";
+import { protectRoute } from "./src/Middleware/authmiddleware.js";
 
 dotenv.config();
 
@@ -17,8 +17,8 @@ app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 
-app.use("/api/auth", authRouter);
-app.use("/api/messages", protectRoute, msgRouter);
+app.use("/Route/auth", authRouter);
+app.use("/Route/message", protectRoute, msgRouter);
 
 const PORT = process.env.PORT || 5000;
 async function start() {
